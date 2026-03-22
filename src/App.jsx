@@ -1,121 +1,126 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {  Route, Routes } from "react-router-dom";
 
-function App() {
-  const [count, setCount] = useState(0)
+import { Toaster } from "./components/ui/Toaster";
+import { TooltipProvider } from "./components/ui/tooltip";
 
+import {
+  LayoutDashboard,
+  Calendar,
+  User,
+  Car,
+  Plus,
+  Building2,
+  DollarSign,
+  Users,
+  MapPin,
+  ClipboardList
+} from "lucide-react";
+
+import MainLayout from "./layouts/MainLayout";
+import DashboardLayout from "./layouts/DashboardLayout";
+import PageTransition from "./components/PageTransition";
+
+import HomePage from "./pages/HomePage";
+import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
+import ParkingDetailsPage from "./pages/ParkingDetailsPage";
+import NotFound from "./pages/NotFound";
+
+import UserDashboard from "./pages/user/UserDashboard";
+import UserBookings from "./pages/user/UserBookings";
+import UserProfile from "./pages/user/UserProfile";
+
+import ProviderDashboard from "./pages/provider/ProviderDashboard";
+import AddParking from "./pages/provider/AddParking";
+import MyParkings from "./pages/provider/MyParkings";
+import ProviderBookings from "./pages/provider/ProviderBookings";
+import ProviderEarnings from "./pages/provider/ProviderEarnings";
+
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminProviders from "./pages/admin/AdminProviders";
+import AdminUsers from "./pages/admin/AdminUsers";
+import AdminBookings from "./pages/admin/AdminBookings";
+import AdminParkings from "./pages/admin/AdminParkings";
+
+const queryClient = new QueryClient();
+
+const userSidebarItems = [
+  { label: "Dashboard", to: "/user/dashboard", icon: LayoutDashboard },
+  { label: "My Bookings", to: "/user/bookings", icon: Calendar },
+  { label: "Profile", to: "/user/profile", icon: User },
+];
+
+const providerSidebarItems = [
+  { label: "Dashboard", to: "/provider/dashboard", icon: LayoutDashboard },
+  { label: "Add Parking", to: "/provider/add-parking", icon: Plus },
+  { label: "My Parkings", to: "/provider/my-parkings", icon: Car },
+  { label: "Bookings", to: "/provider/bookings", icon: Calendar },
+  { label: "Earnings", to: "/provider/earnings", icon: DollarSign },
+];
+
+const adminSidebarItems = [
+  { label: "Dashboard", to: "/admin/dashboard", icon: LayoutDashboard },
+  { label: "Providers", to: "/admin/providers", icon: Building2 },
+  { label: "Users", to: "/admin/users", icon: Users },
+  { label: "Bookings", to: "/admin/bookings", icon: ClipboardList },
+  { label: "Parkings", to: "/admin/parkings", icon: MapPin },
+];
+
+const App = () => {
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base bg-amber-600" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
 
-      <div className="ticks"></div>
+        
+            <PageTransition>
+              <Routes>
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+                {/* Public Routes */}
+                <Route element={<MainLayout />}>
+                  <Route path="/" element={<HomePage />} />
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/register" element={<RegisterPage />} />
+                  <Route path="/parking/:id" element={<ParkingDetailsPage />} />
+                </Route>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
-}
+                {/* User Routes */}
+                <Route element={<DashboardLayout sidebarItems={userSidebarItems} title="User Portal" />}>
+                  <Route path="/user/dashboard" element={<UserDashboard />} />
+                  <Route path="/user/bookings" element={<UserBookings />} />
+                  <Route path="/user/profile" element={<UserProfile />} />
+                </Route>
 
-export default App
+                {/* Provider Routes */}
+                <Route element={<DashboardLayout sidebarItems={providerSidebarItems} title="Provider Portal" />}>
+                  <Route path="/provider/dashboard" element={<ProviderDashboard />} />
+                  <Route path="/provider/add-parking" element={<AddParking />} />
+                  <Route path="/provider/my-parkings" element={<MyParkings />} />
+                  <Route path="/provider/bookings" element={<ProviderBookings />} />
+                  <Route path="/provider/earnings" element={<ProviderEarnings />} />
+                </Route>
+
+                {/* Admin Routes */}
+                <Route element={<DashboardLayout sidebarItems={adminSidebarItems} title="Admin Portal" />}>
+                  <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                  <Route path="/admin/providers" element={<AdminProviders />} />
+                  <Route path="/admin/users" element={<AdminUsers />} />
+                  <Route path="/admin/bookings" element={<AdminBookings />} />
+                  <Route path="/admin/parkings" element={<AdminParkings />} />
+                </Route>
+
+                <Route path="*" element={<NotFound />} />
+
+              </Routes>
+            </PageTransition>
+          
+
+        </TooltipProvider>
+      </QueryClientProvider>
+
+  );
+};
+
+export default App;

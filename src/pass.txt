@@ -1,0 +1,11 @@
+Admin
+email: admin@parking.com
+password: admin123
+
+Provider
+email: provider@parking.com
+password: provider123
+
+User
+email: user@parking.com
+password: user123
