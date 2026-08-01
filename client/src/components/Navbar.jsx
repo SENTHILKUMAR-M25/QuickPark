@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, Menu, X, ArrowRight } from "lucide-react";
 import { MagneticButton } from "./ui/Primitives";
-
+import logo from "../../public/logo.jpeg"
 const LINKS = [
   { label: "How it works", href: "#how-it-works" },
   { label: "Features", href: "#features" },
@@ -36,10 +36,8 @@ export default function Navbar() {
           }`}
         >
           <a href="#top" className="flex items-center gap-2.5" aria-label="Quick Park home">
-            <span className="relative grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 shadow-glow">
-              <MapPin size={18} className="text-white" strokeWidth={2.6} />
-              <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-mint-400" />
-            </span>
+            <img src={logo} className="relative grid h-12 w-10 place-items-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 shadow-glow" />
+            
             <span className="font-display text-lg font-bold tracking-tight text-ink">
               Quick<span className="text-gradient">Park</span>
             </span>
