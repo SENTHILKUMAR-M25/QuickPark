@@ -1,0 +1,98 @@
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: ["./index.html", "./src/**/*.{js,jsx}"],
+  theme: {
+    extend: {
+      colors: {
+        brand: {
+          50: "#eff4ff",
+          100: "#dbe6fe",
+          200: "#bfd3fe",
+          300: "#93b4fd",
+          400: "#6090fa",
+          500: "#3b73f6",
+          600: "#2563eb",
+          700: "#1d4fd8",
+          800: "#1e42ae",
+          900: "#1e3a89",
+          950: "#172554",
+        },
+        mint: {
+          50: "#ecfdf5",
+          100: "#d1fae5",
+          200: "#a7f3d0",
+          300: "#6ee7b7",
+          400: "#34d399",
+          500: "#10b981",
+          600: "#059669",
+          700: "#047857",
+          800: "#065f46",
+          900: "#064e3b",
+        },
+        ember: {
+          50: "#fff7ed",
+          100: "#ffedd5",
+          200: "#fed7aa",
+          300: "#fdba74",
+          400: "#fb923c",
+          500: "#f97316",
+          600: "#ea580c",
+          700: "#c2410c",
+          800: "#9a3412",
+          900: "#7c2d12",
+        },
+        ink: {
+          DEFAULT: "#111827",
+          50: "#f8fafc",
+          100: "#f1f5f9",
+          200: "#e2e8f0",
+          300: "#cbd5e1",
+          400: "#94a3b8",
+          500: "#64748b",
+          600: "#475569",
+          700: "#374151",
+          800: "#1f2937",
+          900: "#111827",
+          950: "#0b1220",
+        },
+      },
+      fontFamily: {
+        sans: ["Inter Variable", "Inter", "system-ui", "sans-serif"],
+        display: ["Sora Variable", "Sora", "system-ui", "sans-serif"],
+      },
+      boxShadow: {
+        soft: "0 8px 30px rgba(17, 24, 39, 0.06)",
+        lift: "0 24px 60px -12px rgba(17, 24, 39, 0.18)",
+        glow: "0 0 0 1px rgba(37,99,235,0.08), 0 20px 50px -12px rgba(37,99,235,0.35)",
+        "glow-mint": "0 0 0 1px rgba(16,185,129,0.1), 0 20px 50px -12px rgba(16,185,129,0.35)",
+        "glow-ember": "0 0 0 1px rgba(249,115,22,0.1), 0 20px 50px -12px rgba(249,115,22,0.35)",
+      },
+      keyframes: {
+        floaty: {
+          "0%, 100%": { transform: "translateY(0px)" },
+          "50%": { transform: "translateY(-14px)" },
+        },
+        "pin-pulse": {
+          "0%": { transform: "scale(0.7)", opacity: 0.7 },
+          "70%": { transform: "scale(2.2)", opacity: 0 },
+          "100%": { transform: "scale(2.2)", opacity: 0 },
+        },
+        marquee: {
+          "0%": { transform: "translateX(0)" },
+          "100%": { transform: "translateX(-50%)" },
+        },
+        "spin-slow": {
+          "0%": { transform: "rotate(0deg)" },
+          "100%": { transform: "rotate(360deg)" },
+        },
+      },
+      animation: {
+        floaty: "floaty 6s ease-in-out infinite",
+        "floaty-slow": "floaty 9s ease-in-out infinite",
+        marquee: "marquee 32s linear infinite",
+        "spin-slow": "spin-slow 24s linear infinite",
+      },
+    },
+  },
+  plugins: [],
+};
