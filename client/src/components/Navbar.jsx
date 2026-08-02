@@ -1,17 +1,60 @@
 import React, { useEffect, useState } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { MapPin, Menu, X, ArrowRight } from "lucide-react";
-import { MagneticButton } from "./ui/Primitives";
-import logo from "../../public/logo.jpeg"
-const LINKS = [
-  { label: "How it works", href: "#how-it-works" },
-  { label: "Features", href: "#features" },
-  { label: "For Drivers", href: "#benefits" },
-  { label: "For Owners", href: "#owners" },
-  { label: "FAQ", href: "#faq" },
+import { Menu, X, LogOut } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
+import { roleMeta } from "../lib/auth.meta";
+import ProfileMenu from "./nav/ProfileMenu";
+import NotificationBell from "./nav/NotificationBell";
+import AuthButtons from "./auth/AuthButtons";
+import ThemeToggle from "./ui/ThemeToggle";
+import logo from "../../public/logo.jpeg";
+
+const GuestLinks = [
+  { label: "Features", to: "/#features" },
+  { label: "How It Works", to: "/#how-it-works" },
+  { label: "Pricing", to: "/#pricing" },
+  { label: "FAQ", to: "/#faq" },
 ];
 
+const UserLinks = [
+  { label: "Find Parking", to: "/find-parking" },
+  { label: "My Bookings", to: "/bookings" },
+  { label: "Favorites", to: "/favorites" },
+];
+
+const ProviderLinks = [
+  { label: "My Parking", to: "/provider/parking" },
+  { label: "Bookings", to: "/provider/bookings" },
+  { label: "Revenue", to: "/provider/revenue" },
+];
+
+function DesktopLink({ to }) {
+  return (
+    <NavLink
+      to={to}
+      className={({ isActive }) =>
+        `group relative rounded-full px-4 py-2 text-sm font-medium transition-colors ${isActive ? "text-ink dark:text-white" : "text-slate-600 hover:text-ink dark:text-ink-300 dark:hover:text-white"}`
+      }
+    >
+      {({ isActive }) => (
+        <>
+          {labelOf(to)}
+          <span className={`absolute inset-x-4 -bottom-0.5 h-px scale-x-0 bg-gradient-to-r from-brand-500 to-mint-500 transition-transform duration-300 group-hover:scale-x-100 ${isActive ? "scale-x-100" : ""}`} />
+        </>
+      )}
+    </NavLink>
+  );
+}
+
+function labelOf(to) {
+  const all = [...GuestLinks, ...UserLinks, ...ProviderLinks];
+  return (all.find((l) => l.to === to) || {}).label || "";
+}
+
 export default function Navbar() {
+  const { isAuthenticated, role, isProvider, logout } = useAuth();
+  const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -21,6 +64,41 @@ export default function Navbar() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  const meta = roleMeta(role);
+  const links = !isAuthenticated
+    ? GuestLinks
+    : isProvider
+      ? ProviderLinks
+      : UserLinks;
+
+  const mobileLinks = !isAuthenticated
+    ? [
+        { label: "Home", to: "/" },
+        { label: "Features", to: "/#features" },
+        { label: "FAQ", to: "/#faq" },
+        { label: "Login", to: meta.login },
+        { label: "Register", to: meta.register },
+      ]
+    : isProvider
+      ? [
+          { label: "Dashboard", to: "/provider/dashboard" },
+          { label: "Parking", to: "/provider/parking" },
+          { label: "Bookings", to: "/provider/bookings" },
+          { label: "Wallet", to: "/provider/wallet" },
+        ]
+      : [
+          { label: "Home", to: "/" },
+          { label: "Find Parking", to: "/find-parking" },
+          { label: "Bookings", to: "/bookings" },
+          { label: "Notifications", to: "/notifications" },
+        ];
+
+  async function handleLogout() {
+    setOpen(false);
+    await logout();
+    navigate("/");
+  }
 
   return (
     <motion.header
@@ -35,38 +113,36 @@ export default function Navbar() {
             scrolled ? "glass-dark shadow-card" : "bg-transparent"
           }`}
         >
-          <a href="#top" className="flex items-center gap-2.5" aria-label="Quick Park home">
-            <img src={logo} className="relative grid h-12 w-10 place-items-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 shadow-glow" />
-            
-            <span className="font-display text-lg font-bold tracking-tight text-ink">
+          <NavLink to="/" className="flex items-center gap-2.5" aria-label="Quick Park home">
+            <img
+              src={logo}
+              alt=""
+              className="h-12 w-10 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 object-cover shadow-glow"
+            />
+            <span className="font-display text-lg font-bold tracking-tight text-ink dark:text-white">
               Quick<span className="text-gradient">Park</span>
             </span>
-          </a>
+          </NavLink>
 
           <nav className="hidden items-center gap-1 lg:flex" aria-label="Primary">
-            {LINKS.map((l) => (
-              <a
-                key={l.href}
-                href={l.href}
-                className="group relative rounded-full px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:text-ink"
-              >
-                {l.label}
-                <span className="absolute inset-x-4 -bottom-0.5 h-px scale-x-0 bg-gradient-to-r from-brand-500 to-mint-500 transition-transform duration-300 group-hover:scale-x-100" />
-              </a>
+            {links.map((l) => (
+              <DesktopLink key={l.to} to={l.to} />
             ))}
           </nav>
 
           <div className="hidden items-center gap-3 lg:flex">
-            <a
-              href="#faq"
-              className="rounded-full px-4 py-2 text-sm font-semibold text-slate-600 transition-colors hover:text-brand-600"
-            >
-              Sign in
-            </a>
-            <MagneticButton className="group inline-flex items-center gap-2 rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-white shadow-lift transition-shadow hover:shadow-xl">
-              Join waitlist
-              <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-0.5" />
-            </MagneticButton>
+            <ThemeToggle />
+            {isAuthenticated ? (
+              <>
+                <NotificationBell
+                  unread={isProvider ? 5 : 3}
+                  to={isProvider ? "/provider/notifications" : "/notifications"}
+                />
+                <ProfileMenu />
+              </>
+            ) : (
+              <AuthButtons role={role} />
+            )}
           </div>
 
           <button
@@ -89,26 +165,37 @@ export default function Navbar() {
             transition={{ duration: 0.25 }}
             className="container-x lg:hidden"
           >
-            <div className="mt-2 rounded-2xl glass-dark shadow-lift p-4">
+            <div className="mt-2 rounded-2xl glass-dark p-4 shadow-lift">
+              <div className="mb-2 flex items-center justify-between">
+                <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400 dark:text-ink-500">
+                  Appearance
+                </span>
+                <ThemeToggle compact />
+              </div>
               <nav className="flex flex-col" aria-label="Mobile">
-                {LINKS.map((l) => (
-                  <a
-                    key={l.href}
-                    href={l.href}
+                {mobileLinks.map((l) => (
+                  <NavLink
+                    key={l.label}
+                    to={l.to}
                     onClick={() => setOpen(false)}
-                    className="rounded-xl px-4 py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-brand-50 hover:text-brand-700"
+                    className="rounded-xl px-4 py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-brand-50 hover:text-brand-700 dark:text-ink-200 dark:hover:bg-brand-500/10 dark:hover:text-brand-300"
                   >
                     {l.label}
-                  </a>
+                  </NavLink>
                 ))}
               </nav>
-              <div className="mt-2 border-t border-slate-100 pt-3">
-                <button
-                  onClick={() => setOpen(false)}
-                  className="w-full rounded-xl bg-ink px-4 py-3 text-sm font-semibold text-white"
-                >
-                  Join the waitlist
-                </button>
+
+              <div className="mt-2 flex flex-col gap-2 border-t border-slate-100 pt-3 dark:border-ink-700/60">
+                {isAuthenticated ? (
+                  <button
+                    onClick={handleLogout}
+                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-ink px-4 py-3 text-sm font-semibold text-white"
+                  >
+                    <LogOut size={16} /> Logout
+                  </button>
+                ) : (
+                  <AuthButtons role={role} />
+                )}
               </div>
             </div>
           </motion.div>

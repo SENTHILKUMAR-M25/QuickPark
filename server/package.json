@@ -1,26 +1,47 @@
 {
-  "name": "server",
+  "name": "quickpark-server",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Quick Park - Authentication & Dashboard API (Smart Parking Marketplace)",
+  "type": "module",
+  "main": "src/server.js",
   "scripts": {
-  "start": "node server.js",
-  "dev": "nodemon server.js"
-},
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+    "dev": "nodemon",
+    "start": "node src/server.js",
+    "prisma:generate": "prisma generate",
+    "prisma:push": "prisma db push",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:deploy": "prisma migrate deploy",
+    "prisma:seed": "prisma db seed",
+    "seed": "node prisma/seed.js"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
+  },
+  "keywords": [
+    "parking",
+    "authentication",
+    "prisma",
+    "express",
+    "jwt"
+  ],
+  "license": "MIT",
   "dependencies": {
-    "bcryptjs": "^3.0.3",
+    "@prisma/client": "^5.22.0",
+    "bcryptjs": "^2.4.3",
+    "cloudinary": "^2.10.0",
     "cookie-parser": "^1.4.7",
-    "cors": "^2.8.6",
-    "dotenv": "^17.4.2",
-    "express": "^5.2.1",
-    "jsonwebtoken": "^9.0.3",
-    "mongoose": "^9.9.1",
-    "multer": "^2.2.0"
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "express-rate-limit": "^7.4.1",
+    "helmet": "^8.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
+    "nodemailer": "^6.9.15",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
-    "nodemon": "^3.1.14"
+    "nodemon": "^3.1.7",
+    "prisma": "^5.22.0"
   }
 }

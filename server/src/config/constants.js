@@ -1,0 +1,28 @@
+export const ROLES = Object.freeze({
+  USER: "USER",
+  PROVIDER: "PROVIDER",
+  ADMIN: "ADMIN",
+});
+
+export const PROVIDER_TYPES = Object.freeze({
+  HOUSE: "HOUSE",
+  APARTMENT: "APARTMENT",
+  COMMERCIAL: "COMMERCIAL",
+  HOTEL: "HOTEL",
+  HOSPITAL: "HOSPITAL",
+  MALL: "MALL",
+  OFFICE: "OFFICE",
+  SCHOOL: "SCHOOL",
+});
+
+export const OTP_PURPOSES = Object.freeze({
+  EMAIL_VERIFICATION: "EMAIL_VERIFICATION",
+  PHONE_VERIFICATION: "PHONE_VERIFICATION",
+  PASSWORD_RESET: "PASSWORD_RESET",
+  LOGIN: "LOGIN",
+});
+
+export const OTP_CHANNELS = Object.freeze({
+  EMAIL: "EMAIL",
+  PHONE: "PHONE",
+});
