@@ -17,7 +17,8 @@ const TOKEN_KEY = "qp_access_token";
 
 /**
  * The current authenticated account (normalized).
- * @typedef {{ id: string, name: string, email: string, role: "USER"|"PROVIDER"|"ADMIN", profileImage?: string|null }} AuthUser
+ * @typedef {{ id: string, name: string, email: string, role: "USER"|"PROVIDER"|"ADMIN",
+ *            profileImage?: string|null, profile?: object|null }} AuthUser
  */
 
 function readSession() {
@@ -29,21 +30,26 @@ function readSession() {
   }
 }
 
-/** Normalize a raw session blob into the Auth user shape. */
+/**
+ * Normalize a raw account blob (unified backend shape or legacy) into the
+ * Auth user shape. `profile` holds the role-specific 1:1 profile.
+ */
 function normalizeUser(rawUser, role) {
   if (!rawUser) return null;
   const u = rawUser.user || rawUser;
+  const profile = u.profile && typeof u.profile === "object" ? u.profile : {};
   return {
     id: u.id,
     name:
-      u.name ||
-      u.businessName ||
       u.fullName ||
-      u.ownerName ||
+      profile.businessName ||
+      u.businessName ||
+      u.name ||
       "Quick Park Member",
     email: u.email || "",
     role: (u.role || role || "USER").toUpperCase(),
-    profileImage: u.profileImage || u.avatar || u.profilePhoto || null,
+    profileImage: u.profileImage || u.avatar || u.profilePhoto || profile.profilePhoto || null,
+    profile,
   };
 }
 
@@ -68,6 +74,18 @@ export function AuthProvider({ children }) {
     localStorage.removeItem(TOKEN_KEY);
     setSession(null);
   }, []);
+
+  /** Persist a completed auth exchange: `{ accessToken, user }`. */
+  const applyAuth = useCallback(
+    (authData, roleHint) => {
+      const { accessToken, user } = authData || {};
+      if (!user) return null;
+      const normalized = normalizeUser(user, roleHint);
+      persist(normalized, accessToken);
+      return normalized;
+    },
+    [persist]
+  );
 
   /** Core bootstrap: access token -> refresh token -> /auth/me -> logout. */
   const bootstrap = useCallback(async () => {
@@ -96,9 +114,9 @@ export function AuthProvider({ children }) {
       persist(normalizeUser(data?.data, null), null);
     } catch (err) {
       const status = err?.response?.status;
-      // Only clear on actual auth failure; keep network/timeout errors as-is
-      // so we can retry later.
-      if (status === 401 || status === 403) clear();
+      if (status === 401 || status === 403 || !localStorage.getItem(TOKEN_KEY)) {
+        clear();
+      }
     }
     setLoading(false);
   }, [persist, clear]);
@@ -112,12 +130,10 @@ export function AuthProvider({ children }) {
   const login = useCallback(
     async (payload, role) => {
       const { data } = await authService.login({ ...payload, role });
-      const { accessToken, user } = data.data;
-      // Persist immediately with anything the login endpoint already returned.
-      persist(normalizeUser(user, role), accessToken);
-      return data.data;
+      const normalized = applyAuth(data.data, role);
+      return { ...data.data, user: normalized };
     },
-    [persist]
+    [applyAuth]
   );
 
   const logout = useCallback(async () => {
@@ -141,9 +157,10 @@ export function AuthProvider({ children }) {
       loading,
       login,
       logout,
+      applyAuth,
       updateUser: (user) => persist(normalizeUser(user, session?.role), undefined),
     }),
-    [session, loading, login, logout, persist]
+    [session, loading, login, logout, applyAuth, persist]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

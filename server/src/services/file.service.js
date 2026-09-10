@@ -49,6 +49,16 @@ export const uploadProviderDocs = multer({
   { name: "profilePhoto", maxCount: 1 },
 ]);
 
+export const uploadParkingImages = multer({
+  storage,
+  limits,
+  fileFilter: fileFilter(IMAGE_TYPES),
+}).fields([
+  { name: "files", maxCount: 10 },
+  { name: "propertyProof", maxCount: 1 },
+  { name: "parkingLicense", maxCount: 1 },
+]);
+
 const folder = env.cloudinary.folder || "quickpark";
 
 /** Upload a single local file buffer/path to Cloudinary. */
@@ -84,6 +94,7 @@ function extractPublicId(url) {
 export default {
   uploadSingle,
   uploadProviderDocs,
+  uploadParkingImages,
   uploadToCloudinary,
   destroyCloudinary,
 };

@@ -26,24 +26,24 @@ export const ROLE_META = {
   [ROLES.USER]: {
     label: "User",
     badge: "User",
-    home: "/dashboard",
+    home: "/user/dashboard",
     login: "/login",
     register: "/register",
     nav: [
       { label: "Home", to: "/" },
-      { label: "Find Parking", to: "/find-parking" },
-      { label: "My Bookings", to: "/bookings" },
+      { label: "Find Parking", to: "/search" },
+      { label: "My Bookings", to: "/user/dashboard" },
       { label: "Favorites", to: "/favorites" },
     ],
     mobileNav: [
       { label: "Home", to: "/" },
-      { label: "Find Parking", to: "/find-parking" },
-      { label: "My Bookings", to: "/bookings" },
+      { label: "Find Parking", to: "/search" },
+      { label: "My Bookings", to: "/user/dashboard" },
       { label: "Notifications", to: "/notifications" },
     ],
     dropdown: [
-      { label: "Dashboard", to: "/dashboard" },
-      { label: "My Bookings", to: "/bookings" },
+      { label: "Dashboard", to: "/user/dashboard" },
+      { label: "My Bookings", to: "/user/dashboard" },
       { label: "Saved Parking", to: "/favorites" },
       { label: "Notifications", to: "/notifications" },
       { label: "Profile", to: "/profile" },
@@ -92,4 +92,9 @@ export const ROLE_META = {
 
 export function roleMeta(role) {
   return ROLE_META[role] || ROLE_META[ROLES.USER];
+}
+
+/** Role-aware dashboard route. */
+export function dashboardFor(role) {
+  return (ROLE_META[role] || ROLE_META[ROLES.USER]).home;
 }

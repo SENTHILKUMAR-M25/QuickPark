@@ -10,18 +10,12 @@ async function cleanPrevious(identifier, purpose) {
   });
 }
 
-function mapOwner(owner, key) {
-  if (owner === "user") return { userId: key };
-  if (owner === "provider") return { providerId: key };
-  return {};
-}
-
 /**
  * Create + deliver an OTP for an identifier (email or phone).
+ * Optionally links the OTP to an Auth identity via `authId`.
  */
-export async function createAndSendOtp({ identifier, purpose, channel = "EMAIL", owner, userId, providerId }) {
+export async function createAndSendOtp({ identifier, purpose, channel = "EMAIL", authId }) {
   const code = generateOtp(6);
-  const ownerLink = mapOwner(owner, owner === "user" ? userId : providerId);
 
   await cleanPrevious(identifier, purpose);
   await prisma.oTP.create({
@@ -29,9 +23,9 @@ export async function createAndSendOtp({ identifier, purpose, channel = "EMAIL",
       identifier,
       purpose,
       channel,
+      authId: authId || null,
       codeHash: hashCode(code),
       expiresAt: new Date(Date.now() + env.otp.expiresMinutes * 60 * 1000),
-      ...ownerLink,
     },
   });
 

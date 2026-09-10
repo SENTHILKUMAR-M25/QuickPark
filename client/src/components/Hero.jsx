@@ -35,7 +35,7 @@ function FloatCard({ className = "", delay = 0, children }) {
       <motion.div
         animate={{ y: [0, -10, 0] }}
         transition={{ duration: 5.5, delay, repeat: Infinity, ease: "easeInOut" }}
-        className="glass-dark rounded-2xl p-4 shadow-lift"
+        className="glass rounded-2xl p-4 shadow-lift"
       >
         {children}
       </motion.div>
@@ -292,13 +292,13 @@ function AuthenticatedHero() {
           >
             {isUser ? (
               <>
-                <Link to="/find-parking">
+                <Link to="/search">
                   <MagneticButton className="group inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-brand-600 to-brand-700 px-7 py-4 text-sm font-semibold text-white shadow-glow transition-all duration-300 hover:shadow-[0_0_0_1px_rgba(37,99,235,0.12),0_24px_60px_-12px_rgba(37,99,235,0.5)] sm:w-auto">
                     Find Parking
                     <ArrowRight size={18} className="transition-transform duration-300 group-hover:translate-x-1" />
                   </MagneticButton>
                 </Link>
-                <Link to="/bookings">
+                <Link to="/user/dashboard">
                   <MagneticButton className="group inline-flex w-full items-center justify-center gap-2 rounded-full border border-slate-200 bg-white/80 px-7 py-4 text-sm font-semibold text-ink shadow-soft backdrop-blur transition-all duration-300 hover:border-mint-300 hover:shadow-glow-mint sm:w-auto">
                     <CalendarDays size={18} className="text-brand-500" />
                     View My Bookings

@@ -6,28 +6,25 @@ import {
   verifyRefreshToken,
 } from "../utils/jwt.js";
 import { ApiError } from "../utils/ApiError.js";
-import { ROLES } from "../config/constants.js";
-
-function modelForRole(role) {
-  return role === ROLES.PROVIDER ? prisma.provider : prisma.user;
-}
+import { ACCOUNT_STATUS } from "../config/constants.js";
 
 /**
- * Issue an access + refresh token pair and persist the refresh session.
+ * Issue an access + refresh token pair and persist the refresh session
+ * against the single Auth identity (authId).
  */
-export async function issueTokens({ id, role, userAgent, ip, remember }) {
-  const payload = { sub: id, role };
+export async function issueTokens({ authId, role, userAgent, ip, remember }) {
+  const payload = { sub: authId, role };
   const accessToken = signAccessToken(payload);
   const refreshToken = signRefreshToken(payload);
   const expiresInMs = 1000 * (remember ? 30 : 7) * 24 * 60 * 60; // 30d / 7d
 
   await prisma.session.create({
     data: {
+      authId,
       refreshToken,
       userAgent: userAgent || null,
       ip: ip || null,
       expiresAt: new Date(Date.now() + expiresInMs),
-      ...(role === ROLES.PROVIDER ? { providerId: id } : { userId: id }),
     },
   });
 
@@ -51,21 +48,25 @@ export async function rotateRefreshToken(refreshToken, { userAgent, ip }) {
 
   const session = await prisma.session.findFirst({
     where: { refreshToken, revokedAt: null, expiresAt: { gt: new Date() } },
+    include: { auth: { select: { accountStatus: true } } },
   });
 
   if (!session) {
     throw new ApiError(401, "Session not found or revoked.");
   }
+  if (session.auth.accountStatus !== ACCOUNT_STATUS.ACTIVE) {
+    throw new ApiError(403, "Account is not active.");
+  }
 
-  const role = payload.role || (session.userId ? ROLES.USER : ROLES.PROVIDER);
-  const id = session.userId || session.providerId;
+  const authId = session.authId;
+  const role = payload.role;
 
   await prisma.session.update({
     where: { id: session.id },
     data: { revokedAt: new Date() },
   });
 
-  return issueTokens({ id, role, userAgent, ip, remember: true });
+  return issueTokens({ authId, role, userAgent, ip, remember: true });
 }
 
 export async function revokeSession(refreshToken) {
@@ -75,18 +76,10 @@ export async function revokeSession(refreshToken) {
   });
 }
 
-export async function getUser(id, role) {
-  if (role === ROLES.PROVIDER) {
-    return prisma.provider.findUnique({ where: { id } });
-  }
-  return prisma.user.findUnique({ where: { id } });
-}
-
 export const tokenService = {
   issueTokens,
   rotateRefreshToken,
   revokeSession,
-  getUser,
   refreshCookieName: env.jwt.refreshCookieName,
   refreshCookieSecure: env.jwt.refreshCookieSecure,
 };

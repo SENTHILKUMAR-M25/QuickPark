@@ -44,7 +44,7 @@ export const registerUserSchema = z.object({
 });
 
 export const registerProviderSchema = z.object({
-  ownerName: z.string().trim().min(2, "Owner name is required").max(120),
+  fullName: z.string().trim().min(2, "Full name is required").max(120),
   businessName: z.string().trim().max(160).optional(),
   providerType: z.enum(["HOUSE", "APARTMENT", "COMMERCIAL", "HOTEL", "HOSPITAL", "MALL", "OFFICE", "SCHOOL"]),
   email,
@@ -56,7 +56,7 @@ export const registerProviderSchema = z.object({
 export const loginSchema = z.object({
   identifier,
   password: z.string().min(1, "Password is required"),
-  role: z.enum(["USER", "PROVIDER"]).optional(),
+  role: z.enum(["USER", "PROVIDER", "ADMIN"]).optional(),
   rememberMe: z.boolean().optional(),
 });
 
@@ -72,7 +72,7 @@ export const forgotPasswordSchema = z.object({
 export const sendOtpSchema = z.object({
   identifier: email.or(phone("Mobile number")),
   purpose: z.enum(["EMAIL_VERIFICATION", "PASSWORD_RESET", "LOGIN"]),
-  role: z.enum(["USER", "PROVIDER"]).optional(),
+  role: z.enum(["USER", "PROVIDER", "ADMIN"]).optional(),
 });
 
 export const verifyOtpSchema = z.object({

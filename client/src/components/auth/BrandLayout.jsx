@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { MapPin, Sun, ArrowLeft, Sparkles, ShieldCheck } from "lucide-react";
-import { useTheme } from "../../context/ThemeContext";
+import { MapPin, ArrowLeft, Sparkles, ShieldCheck } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { EASE } from "../../lib/motion";
 
@@ -9,7 +8,6 @@ export function BrandPanel({ role, statItems, headline, subline }) {
   const isProvider = role === "PROVIDER";
   return (
     <div className="relative hidden overflow-hidden lg:flex lg:w-[46%]">
-      {/* backdrop */}
       <div className="absolute inset-0 bg-gradient-to-br from-brand-700 via-brand-900 to-ink-950" />
       <div className="absolute -left-24 top-[-15%] h-[40rem] w-[40rem] rounded-full bg-mint-500/20 blur-3xl" />
       <div className="absolute -bottom-32 -right-16 h-[34rem] w-[34rem] rounded-full bg-brand-400/30 blur-3xl" />
@@ -55,7 +53,6 @@ export function BrandPanel({ role, statItems, headline, subline }) {
             </motion.p>
           )}
 
-          {/* floating parking card */}
           <motion.div
             initial={{ opacity: 0, y: 30, rotate: -2 }}
             animate={{ opacity: 1, y: 0 }}
@@ -114,31 +111,22 @@ export function BrandPanel({ role, statItems, headline, subline }) {
 }
 
 export function AuthShell({ children, backTo, role = "USER", panel }) {
-  const { theme, toggle } = useTheme();
   return (
-    <div className="flex min-h-screen bg-[#fbfcfe] dark:bg-ink-950">
+    <div className="flex min-h-screen bg-[#fbfcfe]">
       <BrandPanel
         role={role}
         {...panel}
       />
 
       <div className="relative flex w-full flex-col lg:w-[54%]">
-        {/* top bar */}
         <header className="flex w-full items-center justify-between p-5 lg:p-8">
           <Link
             to={backTo || "/"}
-            className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-medium text-slate-500 transition-colors hover:text-ink dark:text-ink-400 dark:hover:text-ink-100"
+            className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-medium text-slate-500 transition-colors hover:text-ink"
           >
             <ArrowLeft size={16} />
             Back
           </Link>
-          <button
-            onClick={toggle}
-            aria-label="Toggle theme"
-            className="grid h-10 w-10 place-items-center rounded-xl border border-slate-200 bg-white/70 text-ink transition-colors hover:bg-slate-50 dark:border-ink-700 dark:bg-ink-900 dark:text-ink-100 dark:hover:bg-ink-800"
-          >
-            {theme === "dark" ? <Sun size={18} /> : <MoonIcon size={18} />}
-          </button>
         </header>
 
         <main className="flex flex-1 items-center justify-center px-5 pb-16 sm:px-8">
@@ -153,13 +141,5 @@ export function AuthShell({ children, backTo, role = "USER", panel }) {
         </main>
       </div>
     </div>
-  );
-}
-
-function MoonIcon({ size }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
-    </svg>
   );
 }

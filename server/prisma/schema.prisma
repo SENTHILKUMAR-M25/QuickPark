@@ -1,8 +1,11 @@
 // ─────────────────────────────────────────────────────────────
 //  Quick Park · Prisma Schema
 //  A Smart Parking Marketplace
-//  Production-ready: relations, enums, indexes, constraints,
-//  soft-delete, cascade rules and admin-ready roles.
+//  Enterprise auth architecture: single `Auth` identity table
+//  with 1:1 role profiles (`User`, `Provider`) referenced via FK.
+//
+//  All future modules reference Auth.id — one universal identity.
+//  Login credentials live ONLY in `Auth`; never duplicated.
 // ─────────────────────────────────────────────────────────────
 
 generator client {
@@ -21,6 +24,12 @@ enum Role {
   ADMIN // Future ready
 }
 
+enum AccountStatus {
+  ACTIVE
+  BLOCKED
+  DELETED
+}
+
 enum ProviderType {
   HOUSE
   APARTMENT
@@ -32,6 +41,13 @@ enum ProviderType {
   SCHOOL
 }
 
+enum ProviderVerificationStatus {
+  PENDING
+  UNDER_REVIEW
+  VERIFIED
+  REJECTED
+}
+
 enum VehicleType {
   CAR
   BIKE
@@ -40,6 +56,31 @@ enum VehicleType {
   TRUCK
   EV
   OTHER
+}
+
+enum ParkingType {
+  HOUSE // Individual House
+  APARTMENT
+  COMMERCIAL // Commercial Parking
+  MALL
+  HOTEL
+  HOSPITAL
+  OFFICE
+  SCHOOL
+  EVENT // Event Parking
+}
+
+enum ParkingSurface {
+  OPEN
+  COVERED
+  BASEMENT
+  MULTI_LEVEL
+}
+
+enum SpaceStatus {
+  DRAFT
+  ACTIVE
+  INACTIVE
 }
 
 enum BookingStatus {
@@ -82,107 +123,105 @@ enum OTPChannel {
   PHONE
 }
 
-// ── User ────────────────────────────────────────────────────
-model User {
-  id              String    @id @default(cuid())
+// ── Auth (parent — credentials & identity ONLY) ─────────────
+model Auth {
+  id              String        @id @default(uuid())
   fullName        String
-  email           String    @unique @db.VarChar(255)
-  phone           String    @unique @db.VarChar(20)
+  email           String        @unique @db.VarChar(255)
+  phone           String        @unique @db.VarChar(20)
   passwordHash    String
-  role            Role      @default(USER)
-  isEmailVerified Boolean   @default(false)
-  isPhoneVerified Boolean   @default(false)
-  avatar          String?
-  gender          String?
-  dob             DateTime?
-  addressLine     String?
-  city            String?
-  state           String?
-  country         String?
-  postalCode      String?
-  tokenVersion    Int       @default(0)
-  lastLoginAt     DateTime?
-  deletedAt       DateTime?
+  role            Role          @default(USER)
+  isEmailVerified Boolean       @default(false)
+  isPhoneVerified Boolean       @default(false)
+  accountStatus   AccountStatus @default(ACTIVE)
+  profileImage    String?
+  lastLogin       DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 
+  // 1:1 role profiles
+  user     User?
+  provider Provider?
+
+  // Every module references Auth.id
   vehicles           Vehicle[]
+  parkingSpaces      ParkingSpace[]
+  bookingsAsUser     Booking[]           @relation("BookingUser")
+  bookingsAsProvider Booking[]           @relation("BookingProvider")
+  reviewsAsUser      Review[]            @relation("ReviewUser")
+  reviewsAsProvider  Review[]            @relation("ReviewProvider")
   favorites          Favorite[]
-  bookings           Booking[]
-  reviews            Review[]
   notifications      Notification[]
+  wallet             Wallet?
+  payments           Payment[]
   sessions           Session[]
   otps               OTP[]
   emailVerifications EmailVerification[]
   passwordResets     PasswordReset[]
-  wallet             Wallet?
+
+  @@index([role])
+  @@index([accountStatus])
+  @@index([email])
+  @@map("auths")
+}
+
+// ── User (driver profile only — 1:1 with Auth) ──────────────
+model User {
+  id                   String    @id @default(uuid())
+  authId               String    @unique
+  gender               String?
+  dateOfBirth          DateTime?
+  address              String?
+  emergencyContact     String?
+  preferredLanguage    String?
+  notificationSettings Json?
+
+  auth Auth @relation(fields: [authId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([role])
-  @@index([isEmailVerified])
-  @@index([deletedAt])
+  @@index([authId])
   @@map("users")
 }
 
-// ── Provider ────────────────────────────────────────────────
+// ── Provider (parking owner profile only — 1:1 with Auth) ───
 model Provider {
-  id                 String                     @id @default(cuid())
-  ownerName          String
-  businessName       String?
-  providerType       ProviderType
-  email              String                     @unique @db.VarChar(255)
-  phone              String                     @unique @db.VarChar(20)
-  passwordHash       String
-  role               Role                       @default(PROVIDER)
-  gstNumber          String?                    @unique
-  profilePhoto       String?
-  governmentIdUrl    String?
-  businessLicenseUrl String?
-  isEmailVerified    Boolean                    @default(false)
-  isPhoneVerified    Boolean                    @default(false)
-  verificationStatus ProviderVerificationStatus @default(PENDING)
-  slug               String?                    @unique
-  onboardingStep     Int                        @default(0)
-  onboardingComplete Boolean                    @default(false)
-  bankName           String?
-  bankAccountName    String?
-  bankAccountNumber  String?
-  bankIfsc           String?
-  upiId              String?
-  lastLoginAt        DateTime?
-  deletedAt          DateTime?
+  id                         String                     @id @default(uuid())
+  authId                     String                     @unique
+  providerType               ProviderType
+  businessName               String?
+  businessRegistrationNumber String?
+  gstNumber                  String?                    @unique
+  governmentId               String?
+  businessLicense            String?
+  verificationStatus         ProviderVerificationStatus @default(PENDING)
+  walletBalance              Decimal                    @default(0) @db.Decimal(12, 2)
+  rating                     Decimal?                   @db.Decimal(3, 2)
+  totalBookings              Int                        @default(0)
+  totalRevenue               Decimal                    @default(0) @db.Decimal(12, 2)
+  bankAccountName            String?
+  bankAccountNumber          String?
+  ifscCode                   String?
+  upiId                      String?
+  address                    String?
+  location                   Json?
 
-  parkingSpaces      ParkingSpace[]
-  bookings           Booking[]
-  reviews            Review[]
-  notifications      Notification[]
-  sessions           Session[]
-  otps               OTP[]
-  emailVerifications EmailVerification[]
-  passwordResets     PasswordReset[]
-  wallet             Wallet?
+  auth Auth @relation(fields: [authId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([role])
-  @@index([verificationStatus])
+  @@index([authId])
   @@index([providerType])
-  @@index([deletedAt])
+  @@index([verificationStatus])
   @@map("providers")
-}
-
-enum ProviderVerificationStatus {
-  PENDING
-  UNDER_REVIEW
-  VERIFIED
-  REJECTED
 }
 
 // ── Vehicle ─────────────────────────────────────────────────
 model Vehicle {
-  id        String       @id @default(cuid())
-  userId    String
+  id        String       @id @default(uuid())
+  authId    String
   regNumber String       @unique @db.VarChar(20)
   make      String
   model     String
@@ -191,39 +230,65 @@ model Vehicle {
   isDefault Boolean      @default(false)
   deletedAt DateTime?
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  auth Auth @relation(fields: [authId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([userId])
+  @@index([authId])
   @@index([deletedAt])
   @@map("vehicles")
 }
 
 // ── ParkingSpace ────────────────────────────────────────────
 model ParkingSpace {
-  id             String    @id @default(cuid())
-  providerId     String
-  title          String
+  id             String         @id @default(uuid())
+  authId         String // provider's Auth.id
+  parkingName    String
+  parkingType    ParkingType    @default(HOUSE)
   description    String?
-  addressLine    String
+  // location
+  address        String
+  area           String?
+  landmark       String?
   city           String
   state          String
-  postalCode     String?
-  country        String
+  country        String         @default("India")
+  pincode        String?
   latitude       Float?
   longitude      Float?
-  pricePerHour   Decimal   @db.Decimal(10, 2)
-  totalSlots     Int
+  // capacity
+  totalCapacity  Int
   availableSlots Int
-  images         String[]  @default([])
-  isActive       Boolean   @default(true)
-  isVerified     Boolean   @default(false)
-  amenities      String?
+  slotNumbering  String? // JSON string: ["A1","A2",...]
+  vehicleTypes   String[]       @default([]) // ["CAR","BIKE","SUV","EV"]
+  surfaceType    ParkingSurface @default(OPEN)
+  // pricing
+  pricePerHour   Decimal        @db.Decimal(10, 2)
+  pricePerDay    Decimal?       @db.Decimal(10, 2)
+  pricePerMonth  Decimal?       @db.Decimal(10, 2)
+  weekendPricing Json? // { multiplier } or { pricePerHour }
+  festivalPricing Json? // { name, multiplier }
+  // working hours
+  openTime       String? // "09:00"
+  closeTime      String? // "21:00"
+  open24Hours    Boolean        @default(false)
+  availableDays  String[]       @default([]) // ["MONDAY",...]
+  // amenities & rules
+  amenities      String[]       @default([]) // ["CCTV","SECURITY_GUARD",...]
+  rules          Json? // { maxHeight, maxWeight, noOvernight, helmetRequired, noHeavyVehicles, customRules[] }
+  // media & documents
+  coverImage     String?
+  images         String[]       @default([])
+  propertyProof  String?
+  parkingLicense String?
+  // status & metrics
+  status         SpaceStatus    @default(DRAFT)
+  averageRating  Decimal?       @db.Decimal(3, 2)
+  totalBookings  Int            @default(0)
   deletedAt      DateTime?
 
-  provider  Provider   @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  auth      Auth       @relation(fields: [authId], references: [id], onDelete: Cascade)
   bookings  Booking[]
   reviews   Review[]
   favorites Favorite[]
@@ -231,18 +296,18 @@ model ParkingSpace {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([providerId])
+  @@index([authId])
   @@index([city, state])
-  @@index([isActive])
+  @@index([status])
   @@index([deletedAt])
   @@map("parking_spaces")
 }
 
 // ── Booking ─────────────────────────────────────────────────
 model Booking {
-  id            String        @id @default(cuid())
-  userId        String
-  providerId    String
+  id            String        @id @default(uuid())
+  userId        String // driver's Auth.id
+  providerId    String // provider's Auth.id
   spaceId       String
   startAt       DateTime
   endAt         DateTime
@@ -254,8 +319,8 @@ model Booking {
   cancelledAt   DateTime?
   deletedAt     DateTime?
 
-  user     User         @relation(fields: [userId], references: [id], onDelete: Restrict)
-  provider Provider     @relation(fields: [providerId], references: [id], onDelete: Restrict)
+  user     Auth         @relation("BookingUser", fields: [userId], references: [id], onDelete: Restrict)
+  provider Auth         @relation("BookingProvider", fields: [providerId], references: [id], onDelete: Restrict)
   space    ParkingSpace @relation(fields: [spaceId], references: [id], onDelete: Restrict)
 
   payment Payment?
@@ -274,9 +339,10 @@ model Booking {
 
 // ── Payment ─────────────────────────────────────────────────
 model Payment {
-  id        String        @id @default(cuid())
+  id        String        @id @default(uuid())
   bookingId String        @unique
   walletId  String?
+  payerId   String?
   amount    Decimal       @db.Decimal(10, 2)
   method    PaymentMethod @default(CARD)
   status    PaymentStatus @default(PENDING)
@@ -286,11 +352,13 @@ model Payment {
 
   booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
   wallet  Wallet? @relation(fields: [walletId], references: [id], onDelete: Restrict)
+  payer   Auth?   @relation(fields: [payerId], references: [id], onDelete: Restrict)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([walletId])
+  @@index([payerId])
   @@index([status])
   @@index([deletedAt])
   @@map("payments")
@@ -298,22 +366,22 @@ model Payment {
 
 // ── Review ──────────────────────────────────────────────────
 model Review {
-  id        String    @id @default(cuid())
+  id        String    @id @default(uuid())
   bookingId String    @unique
-  userId    String
+  userId    String // reviewer's Auth.id
   spaceId   String
   rating    Int // 1..5
   comment   String?
   deletedAt DateTime?
 
-  booking Booking      @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  user    User         @relation(fields: [userId], references: [id], onDelete: Restrict)
-  space   ParkingSpace @relation(fields: [spaceId], references: [id], onDelete: Restrict)
-
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-  Provider   Provider? @relation(fields: [providerId], references: [id])
+  booking    Booking      @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  user       Auth         @relation("ReviewUser", fields: [userId], references: [id], onDelete: Restrict)
+  space      ParkingSpace @relation(fields: [spaceId], references: [id], onDelete: Restrict)
+  provider   Auth?        @relation("ReviewProvider", fields: [providerId], references: [id])
   providerId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userId])
   @@index([spaceId])
@@ -323,27 +391,26 @@ model Review {
 
 // ── Favorite ↩ myBookings ──────────────────────────────────
 model Favorite {
-  id        String    @id @default(cuid())
-  userId    String
+  id        String    @id @default(uuid())
+  authId    String
   spaceId   String
   deletedAt DateTime?
 
-  user  User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  auth  Auth         @relation(fields: [authId], references: [id], onDelete: Cascade)
   space ParkingSpace @relation(fields: [spaceId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([userId, spaceId])
+  @@unique([authId, spaceId])
   @@index([deletedAt])
   @@map("favorites")
 }
 
 // ── Notification ────────────────────────────────────────────
 model Notification {
-  id         String    @id @default(cuid())
-  userId     String?
-  providerId String?
+  id         String    @id @default(uuid())
+  receiverId String // receiver's Auth.id
   title      String
   message    String
   type       String    @default("INFO")
@@ -351,29 +418,25 @@ model Notification {
   readAt     DateTime?
   deletedAt  DateTime?
 
-  user     User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  provider Provider? @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  receiver Auth @relation(fields: [receiverId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([userId, isRead])
-  @@index([providerId, isRead])
+  @@index([receiverId, isRead])
   @@index([deletedAt])
   @@map("notifications")
 }
 
 // ── Wallet ─────────────────────────────────────────────────
 model Wallet {
-  id         String    @id @default(cuid())
-  userId     String?   @unique
-  providerId String?   @unique
-  balance    Decimal   @default(0) @db.Decimal(12, 2)
-  currency   String    @default("INR")
-  deletedAt  DateTime?
+  id        String    @id @default(uuid())
+  ownerId   String    @unique
+  balance   Decimal   @default(0) @db.Decimal(12, 2)
+  currency  String    @default("INR")
+  deletedAt DateTime?
 
-  user     User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  provider Provider? @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  owner Auth @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 
   transactions Transaction[]
   payments     Payment[]
@@ -387,7 +450,7 @@ model Wallet {
 
 // ── Transaction ────────────────────────────────────────────
 model Transaction {
-  id           String          @id @default(cuid())
+  id           String          @id @default(uuid())
   walletId     String
   type         TransactionType
   amount       Decimal         @db.Decimal(12, 2)
@@ -409,9 +472,8 @@ model Transaction {
 
 // ── Session (refresh tokens) ───────────────────────────────
 model Session {
-  id           String    @id @default(cuid())
-  userId       String?
-  providerId   String?
+  id           String    @id @default(uuid())
+  authId       String
   refreshToken String
   userAgent    String?
   ip           String?
@@ -419,14 +481,12 @@ model Session {
   revokedAt    DateTime?
   deletedAt    DateTime?
 
-  user     User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  provider Provider? @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  auth Auth @relation(fields: [authId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([userId])
-  @@index([providerId])
+  @@index([authId])
   @@index([refreshToken])
   @@index([deletedAt])
   @@map("sessions")
@@ -434,7 +494,8 @@ model Session {
 
 // ── OTP ────────────────────────────────────────────────────
 model OTP {
-  id         String     @id @default(cuid())
+  id         String     @id @default(uuid())
+  authId     String?
   identifier String
   purpose    OTPPurpose
   codeHash   String
@@ -444,14 +505,12 @@ model OTP {
   attempts   Int        @default(0)
   deletedAt  DateTime?
 
-  userId     String?
-  providerId String?
-  user       User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  provider   Provider? @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  auth Auth? @relation(fields: [authId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([authId])
   @@index([identifier])
   @@index([deletedAt])
   @@map("otps")
@@ -459,21 +518,20 @@ model OTP {
 
 // ── PasswordReset ───────────────────────────────────────────
 model PasswordReset {
-  id         String    @id @default(cuid())
+  id         String    @id @default(uuid())
+  authId     String?
   identifier String // email or phone
   tokenHash  String
   expiresAt  DateTime
   usedAt     DateTime?
   deletedAt  DateTime?
 
-  userId     String?
-  providerId String?
-  user       User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  provider   Provider? @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  auth Auth? @relation(fields: [authId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([authId])
   @@index([identifier])
   @@index([usedAt])
   @@index([deletedAt])
@@ -482,21 +540,20 @@ model PasswordReset {
 
 // ── EmailVerification ───────────────────────────────────────
 model EmailVerification {
-  id         String    @id @default(cuid())
+  id         String    @id @default(uuid())
+  authId     String?
   identifier String
   tokenHash  String
   expiresAt  DateTime
   usedAt     DateTime?
   deletedAt  DateTime?
 
-  userId     String?
-  providerId String?
-  user       User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  provider   Provider? @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  auth Auth? @relation(fields: [authId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([authId])
   @@index([identifier])
   @@map("email_verifications")
 }

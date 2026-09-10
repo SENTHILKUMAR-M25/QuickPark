@@ -198,7 +198,7 @@ export default function Benefits() {
                 transition={{ duration: 5.5, repeat: Infinity }}
                 className="absolute -right-4 -top-8 hidden sm:block"
               >
-                <div className="glass-dark flex items-center gap-2 rounded-2xl p-3 shadow-lift">
+                <div className="glass flex items-center gap-2 rounded-2xl p-3 shadow-lift">
                   <span className="grid h-9 w-9 place-items-center rounded-xl bg-mint-100 text-mint-600">
                     <Coins size={18} />
                   </span>

@@ -1,7 +1,7 @@
 import { verifyAccessToken } from "../utils/jwt.js";
 import { getCurrentUser, hasRole } from "../lib/auth.js";
 import { ApiError } from "../utils/ApiError.js";
-import { ROLES } from "../config/constants.js";
+import { ACCOUNT_STATUS, ROLES } from "../config/constants.js";
 
 export async function authenticate(req, res, next) {
   try {
@@ -12,14 +12,14 @@ export async function authenticate(req, res, next) {
     const payload = verifyAccessToken(token);
     const account = await getCurrentUser(payload.sub, payload.role);
 
-    if (!account || account.deletedAt) {
+    if (!account || account.accountStatus !== ACCOUNT_STATUS.ACTIVE) {
       throw new ApiError(401, "Account no longer exists.");
     }
 
     req.auth = {
-      id: account.id,
+      authId: account.id,
+      id: account.id, // universal identity (Auth.id)
       role: account.role,
-      tokenVersion: account.tokenVersion,
       account,
     };
     next();

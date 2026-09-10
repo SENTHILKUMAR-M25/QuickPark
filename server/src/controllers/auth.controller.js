@@ -1,7 +1,6 @@
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { prisma } from "../prisma/client.js";
-import { ROLES } from "../config/constants.js";
 import {
   registerUser as svcRegisterUser,
   registerProvider as svcRegisterProvider,
@@ -13,6 +12,7 @@ import {
 import { createAndSendOtp, verifyOtp } from "../services/otp.service.js";
 import { tokenService } from "../services/token.service.js";
 import { uploadToCloudinary } from "../services/file.service.js";
+import { serializeAccount } from "../lib/presenter.js";
 
 const REFRESH_WINDOW = 7 * 24 * 60 * 60 * 1000;
 
@@ -26,11 +26,30 @@ function setRefreshCookie(res, token) {
   });
 }
 
+function requestMeta(req, remember) {
+  return {
+    userAgent: req.get("user-agent"),
+    ip: req.ip,
+    remember,
+  };
+}
+
 export const registerUser = asyncHandler(async (req, res) => {
-  const user = await svcRegisterUser({ ...req.body, files: req.files });
+  const { rememberMe } = req.body;
+  const { tokens, user } = await svcRegisterUser({
+    ...req.body,
+    ...requestMeta(req, rememberMe),
+  });
+  setRefreshCookie(res, tokens.refreshToken);
   return res
     .status(201)
-    .json(new ApiResponse(201, user, "Account created. Check your email to verify."));
+    .json(
+      new ApiResponse(
+        201,
+        { accessToken: tokens.accessToken, user },
+        "Account created. Check your email to verify."
+      )
+    );
 });
 
 export const registerProvider = asyncHandler(async (req, res) => {
@@ -43,36 +62,34 @@ export const registerProvider = asyncHandler(async (req, res) => {
     pick(files.businessLicense) ? uploadToCloudinary(pick(files.businessLicense).path) : Promise.resolve(null),
   ]);
 
-  const provider = await svcRegisterProvider({
+  const { tokens, user } = await svcRegisterProvider({
     ...req.body,
-    profilePhoto: profile,
+    profileImage: profile,
     governmentId: govt,
     businessLicense: license,
+    ...requestMeta(req, req.body.rememberMe),
   });
+  setRefreshCookie(res, tokens.refreshToken);
   return res
     .status(201)
-    .json(new ApiResponse(201, provider, "Provider account created. Our team will verify your documents."));
+    .json(
+      new ApiResponse(
+        201,
+        { accessToken: tokens.accessToken, user },
+        "Provider account created. Our team will verify your documents."
+      )
+    );
 });
 
 export const login = asyncHandler(async (req, res) => {
   const { identifier, password, rememberMe } = req.body;
-  const role = req.body.role === "PROVIDER" ? "PROVIDER" : "USER";
 
-  const { user } = await svcLogin({
+  const { tokens, user } = await svcLogin({
     identifier,
     password,
-    role,
     remember: rememberMe,
-    userAgent: req.useragent || req.get("user-agent"),
-    ip: req.ip,
-  });
-
-  const tokens = await tokenService.issueTokens({
-    id: user.id,
-    role,
     userAgent: req.get("user-agent"),
     ip: req.ip,
-    remember: rememberMe,
   });
 
   setRefreshCookie(res, tokens.refreshToken);
@@ -84,41 +101,8 @@ export const login = asyncHandler(async (req, res) => {
 
 export const getMe = asyncHandler(async (req, res) => {
   const account = req.auth.account;
-  const isProvider = req.auth.role === ROLES.PROVIDER;
-  const isAdmin = req.auth.role === ROLES.ADMIN;
-
-  if (isProvider) {
-    return res.json(
-      new ApiResponse(200, {
-        id: account.id,
-        name: account.businessName || account.ownerName,
-        email: account.email,
-        role: account.role,
-        profileImage: account.profilePhoto || null,
-      }, "Current user fetched.")
-    );
-  }
-
-  if (isAdmin) {
-    return res.json(
-      new ApiResponse(200, {
-        id: account.id,
-        name: account.fullName || account.name || "Admin",
-        email: account.email,
-        role: ROLES.ADMIN,
-        profileImage: account.avatar || account.profileImage || null,
-      }, "Current user fetched.")
-    );
-  }
-
   return res.json(
-    new ApiResponse(200, {
-      id: account.id,
-      name: account.fullName || account.email,
-      email: account.email,
-      role: account.role || ROLES.USER,
-      profileImage: account.avatar || null,
-    }, "Current user fetched.")
+    new ApiResponse(200, serializeAccount(account), "Current user fetched.")
   );
 });
 
@@ -159,19 +143,16 @@ export const resetPassword = asyncHandler(async (req, res) => {
 });
 
 export const sendOtp = asyncHandler(async (req, res) => {
-  const { identifier, purpose, role } = req.body;
-  const owner = role === "PROVIDER" ? "provider" : "user";
-  let ownerId = null;
-
-  const model = role === "PROVIDER" ? prisma.provider : prisma.user;
-  const found = await model.findFirst({ where: { email: identifier } });
+  const { identifier, purpose } = req.body;
+  const account = await prisma.auth.findFirst({
+    where: { OR: [{ email: identifier }, { phone: identifier }] },
+    select: { id: true },
+  });
 
   const resp = await createAndSendOtp({
     identifier,
     purpose,
-    owner,
-    userId: role === "PROVIDER" ? null : found?.id,
-    providerId: role === "PROVIDER" ? found?.id : null,
+    authId: account?.id || null,
   });
   return res.json(new ApiResponse(200, resp, "OTP sent."));
 });

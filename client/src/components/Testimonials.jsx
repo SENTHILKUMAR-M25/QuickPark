@@ -4,6 +4,19 @@ import { Star, Quote, ChevronLeft, ChevronRight, Car, Home, Briefcase } from "lu
 import { SectionHeading } from "./ui/Primitives";
 import { EASE } from "../lib/motion";
 
+function useMediaQuery(query) {
+  const [matches, setMatches] = useState(
+    () => typeof window !== "undefined" && window.matchMedia(query).matches
+  );
+  useEffect(() => {
+    const mql = window.matchMedia(query);
+    const handler = (e) => setMatches(e.matches);
+    mql.addEventListener("change", handler);
+    return () => mql.removeEventListener("change", handler);
+  }, [query]);
+  return matches;
+}
+
 const CATEGORIES = [
   { id: "all", label: "Everyone", icon: Quote },
   { id: "drivers", label: "Drivers", icon: Car },
@@ -95,6 +108,7 @@ export default function Testimonials() {
   const [cat, setCat] = useState("all");
   const [index, setIndex] = useState(0);
   const timer = useRef(null);
+  const isDesktop = useMediaQuery("(min-width: 640px)");
 
   const filtered = TESTIMONIALS.filter((t) => cat === "all" || t.category === cat);
 
@@ -110,9 +124,13 @@ export default function Testimonials() {
   }, [cat]);
 
   useEffect(() => {
+    if (!isDesktop) {
+      clearTimeout(timer.current);
+      return;
+    }
     timer.current = setTimeout(() => go(1), 7000);
     return () => clearTimeout(timer.current);
-  }, [index, cat, go]);
+  }, [index, cat, go, isDesktop]);
 
   const t = filtered[index % filtered.length] || filtered[0];
   const category = CATEGORIES.find((c) => c.id === t?.category);

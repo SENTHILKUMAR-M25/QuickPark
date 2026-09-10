@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   ArrowRight,
@@ -103,14 +104,18 @@ export default function FinalCTA() {
                 transition={{ duration: 0.85, delay: 0.28, ease: EASE }}
                 className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center lg:justify-start"
               >
-                <MagneticButton className="group inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-brand-500 to-brand-600 px-7 py-4 text-sm font-semibold text-white shadow-[0_0_0_1px_rgba(255,255,255,0.15),0_24px_60px_-12px_rgba(37,99,235,0.8)] transition-all duration-300 hover:shadow-[0_0_0_1px_rgba(255,255,255,0.25),0_30px_70px_-12px_rgba(37,99,235,0.9)] sm:w-auto">
-                  Find Parking
-                  <ArrowRight size={18} className="transition-transform duration-300 group-hover:translate-x-1" />
-                </MagneticButton>
-                <MagneticButton className="group inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/20 bg-white/[0.08] px-7 py-4 text-sm font-semibold text-white backdrop-blur transition-all duration-300 hover:border-mint-400/50 hover:bg-white/[0.14] sm:w-auto">
-                  <KeyRound size={18} className="text-mint-400" />
-                  Become a Parking Partner
-                </MagneticButton>
+                <Link to="/register">
+                  <MagneticButton className="group inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-brand-500 to-brand-600 px-7 py-4 text-sm font-semibold text-white shadow-[0_0_0_1px_rgba(255,255,255,0.15),0_24px_60px_-12px_rgba(37,99,235,0.8)] transition-all duration-300 hover:shadow-[0_0_0_1px_rgba(255,255,255,0.25),0_30px_70px_-12px_rgba(37,99,235,0.9)] sm:w-auto">
+                    Find Parking
+                    <ArrowRight size={18} className="transition-transform duration-300 group-hover:translate-x-1" />
+                  </MagneticButton>
+                </Link>
+                <Link to="/provider/register">
+                  <MagneticButton className="group inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/20 bg-white/[0.08] px-7 py-4 text-sm font-semibold text-white backdrop-blur transition-all duration-300 hover:border-mint-400/50 hover:bg-white/[0.14] sm:w-auto">
+                    <KeyRound size={18} className="text-mint-400" />
+                    Become a Parking Partner
+                  </MagneticButton>
+                </Link>
               </motion.div>
 
               <motion.ul

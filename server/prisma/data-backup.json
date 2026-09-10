@@ -1,0 +1,112 @@
+{
+  "exportedAt": "2026-08-03T13:35:25.747Z",
+  "users": [
+    {
+      "id": "cmsbqok8w0000d94xvdeo6ilh",
+      "fullName": "Senthil",
+      "email": "smskumaar0025@gmail.com",
+      "phone": "8925393946",
+      "passwordHash": "$2a$12$OvYwTwHqhknOKxnJRNQCvuXwmF4tp0NQAoyKHpeDPCsoTvUnlqk6q",
+      "role": "USER",
+      "isEmailVerified": false,
+      "isPhoneVerified": false,
+      "avatar": null,
+      "gender": null,
+      "dob": null,
+      "addressLine": null,
+      "city": null,
+      "state": null,
+      "country": null,
+      "postalCode": null,
+      "tokenVersion": 0,
+      "lastLoginAt": "2026-08-02T12:22:06.615Z",
+      "deletedAt": null,
+      "createdAt": "2026-08-02T11:50:59.456Z",
+      "updatedAt": "2026-08-02T12:22:06.617Z"
+    }
+  ],
+  "providers": [],
+  "sessions": [
+    {
+      "id": "cmsbqvst10005d94xnal89ncx",
+      "userId": "cmsbqok8w0000d94xvdeo6ilh",
+      "providerId": null,
+      "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbXNicW9rOHcwMDAwZDk0eHZkZW82aWxoIiwicm9sZSI6IlVTRVIiLCJpYXQiOjE3ODU2NzE3OTcsImV4cCI6MTc4NjI3NjU5N30.WmNqy3Z1pocEB6IxgKer85MXh7jC-yrMVaj8wkxqO8g",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+      "ip": "127.0.0.1",
+      "expiresAt": "2026-08-09T11:56:37.140Z",
+      "revokedAt": "2026-08-02T12:02:52.670Z",
+      "deletedAt": null,
+      "createdAt": "2026-08-02T11:56:37.141Z",
+      "updatedAt": "2026-08-02T12:02:52.673Z"
+    },
+    {
+      "id": "cmsbr3vsq0001esqa8e3nr928",
+      "userId": "cmsbqok8w0000d94xvdeo6ilh",
+      "providerId": null,
+      "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbXNicW9rOHcwMDAwZDk0eHZkZW82aWxoIiwicm9sZSI6IlVTRVIiLCJpYXQiOjE3ODU2NzIxNzQsImV4cCI6MTc4NjI3Njk3NH0.7RUhOKs9GHTz9ZCmXpfBkicrX4gHaxLV8EEttz8H4ks",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+      "ip": "127.0.0.1",
+      "expiresAt": "2026-09-01T12:02:54.264Z",
+      "revokedAt": "2026-08-02T12:09:07.871Z",
+      "deletedAt": null,
+      "createdAt": "2026-08-02T12:02:54.266Z",
+      "updatedAt": "2026-08-02T12:09:07.873Z"
+    },
+    {
+      "id": "cmsbrbxdo0003esqa7gdf6bdv",
+      "userId": "cmsbqok8w0000d94xvdeo6ilh",
+      "providerId": null,
+      "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbXNicW9rOHcwMDAwZDk0eHZkZW82aWxoIiwicm9sZSI6IlVTRVIiLCJpYXQiOjE3ODU2NzI1NDksImV4cCI6MTc4NjI3NzM0OX0.Acmpfrbi-HyC5MN_9GPEmY4t2TNZai3d__BZgLQFH2I",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+      "ip": "127.0.0.1",
+      "expiresAt": "2026-09-01T12:09:09.563Z",
+      "revokedAt": "2026-08-02T12:12:00.063Z",
+      "deletedAt": null,
+      "createdAt": "2026-08-02T12:09:09.565Z",
+      "updatedAt": "2026-08-02T12:12:00.065Z"
+    },
+    {
+      "id": "cmsbrsmae0005esqay3u26qpe",
+      "userId": "cmsbqok8w0000d94xvdeo6ilh",
+      "providerId": null,
+      "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbXNicW9rOHcwMDAwZDk0eHZkZW82aWxoIiwicm9sZSI6IlVTRVIiLCJpYXQiOjE3ODU2NzMzMjgsImV4cCI6MTc4NjI3ODEyOH0.WsmXYtjXhXidWb4jvEQBrwvSepthQZRXvAHkMCpSpRM",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+      "ip": "127.0.0.1",
+      "expiresAt": "2026-08-09T12:22:08.341Z",
+      "revokedAt": null,
+      "deletedAt": null,
+      "createdAt": "2026-08-02T12:22:08.342Z",
+      "updatedAt": "2026-08-02T12:22:08.342Z"
+    }
+  ],
+  "wallets": [
+    {
+      "id": "cmsbqok8w0001d94xjn5ebvl8",
+      "userId": "cmsbqok8w0000d94xvdeo6ilh",
+      "providerId": null,
+      "balance": "0",
+      "currency": "INR",
+      "deletedAt": null,
+      "createdAt": "2026-08-02T11:50:59.456Z",
+      "updatedAt": "2026-08-02T11:50:59.456Z"
+    }
+  ],
+  "otps": [],
+  "emailVerifications": [
+    {
+      "id": "cmsbqomma0003d94xbfqtlpks",
+      "identifier": "smskumaar0025@gmail.com",
+      "tokenHash": "4dce51673d78ce8bd43459fcf2c6d7662d987de1477620934a13d462cb671371",
+      "expiresAt": "2026-08-03T11:51:02.529Z",
+      "usedAt": null,
+      "deletedAt": null,
+      "userId": "cmsbqok8w0000d94xvdeo6ilh",
+      "providerId": null,
+      "createdAt": "2026-08-02T11:51:02.530Z",
+      "updatedAt": "2026-08-02T11:51:02.530Z"
+    }
+  ],
+  "passwordResets": [],
+  "vehicles": []
+}

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   MapPin,
@@ -14,7 +15,7 @@ import {
   ArrowRight,
   Heart,
 } from "lucide-react";
-
+import logo from "../../public/logo.jpeg"
 const COLUMNS = [
   {
     title: "Product",
@@ -34,7 +35,12 @@ const COLUMNS = [
   },
 ];
 
-const LEGAL = ["Privacy Policy", "Terms of Service", "Cookie Policy", "Refund Policy"];
+const LEGAL = [
+  { label: "Privacy Policy", to: null },
+  { label: "Terms of Service", to: "/terms" },
+  { label: "Cookie Policy", to: null },
+  { label: "Refund Policy", to: null },
+];
 
 const SOCIALS = [
   { icon: Twitter, label: "Twitter" },
@@ -69,10 +75,8 @@ export default function Footer() {
         <div className="grid gap-12 pb-14 lg:grid-cols-[1.15fr_0.85fr] lg:gap-20">
           <div>
             <a href="#top" className="inline-flex items-center gap-2.5" aria-label="Quick Park home">
-              <span className="relative grid h-11 w-11 place-items-center rounded-2xl bg-gradient-to-br from-brand-500 to-brand-700 shadow-glow">
-                <MapPin size={22} className="text-white" strokeWidth={2.4} />
-                <span className="absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full border-2 border-ink-950 bg-mint-400" />
-              </span>
+              <img src={logo} className="relative grid h-13 w-11 place-items-center rounded-2xl"/>
+              
               <span className="font-display text-2xl font-extrabold tracking-tight">
                 Quick<span className="bg-gradient-to-r from-brand-400 to-mint-400 bg-clip-text text-transparent">Park</span>
               </span>
@@ -139,22 +143,22 @@ export default function Footer() {
 
         {/* Contact strip */}
         <div className="grid gap-6 border-t border-white/10 py-8 sm:grid-cols-3">
-          <a href="mailto:support@quickpark.app" className="group flex items-center gap-3">
+          <a href="mailto:quickkkparkk@gmail.com" className="group flex items-center gap-3">
             <span className="grid h-10 w-10 place-items-center rounded-xl bg-white/[0.06] text-mint-400 transition-colors duration-300 group-hover:bg-mint-500 group-hover:text-white">
               <Mail size={17} />
             </span>
             <span>
               <span className="block text-xs text-white/40">Email us</span>
-              <span className="text-sm font-semibold text-white/80 group-hover:text-white">support@quickpark.app</span>
+              <span className="text-sm font-semibold text-white/80 group-hover:text-white">quickkkparkk@gmail.com</span>
             </span>
           </a>
-          <a href="tel:+919000000000" className="group flex items-center gap-3">
+          <a href="tel:+91 8925393946" className="group flex items-center gap-3">
             <span className="grid h-10 w-10 place-items-center rounded-xl bg-white/[0.06] text-brand-400 transition-colors duration-300 group-hover:bg-brand-500 group-hover:text-white">
               <Phone size={17} />
             </span>
             <span>
               <span className="block text-xs text-white/40">Call us</span>
-              <span className="text-sm font-semibold text-white/80 group-hover:text-white">+91 90000 00000</span>
+              <span className="text-sm font-semibold text-white/80 group-hover:text-white">+91 8925393946</span>
             </span>
           </a>
           <a href="#top" className="group flex items-center gap-3">
@@ -163,7 +167,7 @@ export default function Footer() {
             </span>
             <span>
               <span className="block text-xs text-white/40">Headquarters</span>
-              <span className="text-sm font-semibold text-white/80 group-hover:text-white">Bengaluru, India</span>
+              <span className="text-sm font-semibold text-white/80 group-hover:text-white">Madurai</span>
             </span>
           </a>
         </div>
@@ -177,10 +181,19 @@ export default function Footer() {
 
           <ul className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
             {LEGAL.map((l) => (
-              <li key={l}>
-                <a href="#top" className="text-xs text-white/40 transition-colors duration-300 hover:text-white">
-                  {l}
-                </a>
+              <li key={l.label}>
+                {l.to ? (
+                  <Link
+                    to={l.to}
+                    className="text-xs text-white/40 transition-colors duration-300 hover:text-white"
+                  >
+                    {l.label}
+                  </Link>
+                ) : (
+                  <a href="#top" className="text-xs text-white/40 transition-colors duration-300 hover:text-white">
+                    {l.label}
+                  </a>
+                )}
               </li>
             ))}
           </ul>
